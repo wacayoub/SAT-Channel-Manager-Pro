@@ -70,7 +70,7 @@ python3 "$PATCH" || {
 }
 echo 'Downloading Neo icons + satellite selection clarity update...'
 NEO_PATCH='/tmp/satcm-neo-icons-easy-rc4.1.py'
-NEO_BLOB_SHA1='8979466d8197b6c27497d9eeb094e6f765847e64'
+NEO_BLOB_SHA1='c40229a1308ba24810feae370526399b95a46445'
 wget -q -T 30 -t 2 -O "$NEO_PATCH.part" "$BASE/neo-icons-easy-rc4.1.py" || {
     echo 'ERROR: Neo icon update download failed' >&2; exit 1
 }
