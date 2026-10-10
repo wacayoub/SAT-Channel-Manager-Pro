@@ -1,32 +1,32 @@
 #!/bin/sh
-# SAT Channel Manager Pro — install from verified GitHub package.
+# SAT Channel Manager Pro — install verified RC4.1 plus modal crash hotfix
 set -eu
 BASE='https://raw.githubusercontent.com/wacayoub/SAT-Channel-Manager-Pro/main'
 PACKAGE='enigma2-plugin-extensions-satchannelmanager_0.4.1-rc4.1_all.ipk'
 EXPECTED_SHA256='4eed0b5c1c61cf2e763b431a57ef5b2977d845164a345bef439991242595762a'
+HOTFIX='hotfix-rc4.1.sh'
+HOTFIX_SHA256='bc8ff27fd8e82435491d1e4cf1fbb31efb8130f468d0331977eeb018261d7ae5'
 DEST="/tmp/$PACKAGE"
-if ! command -v opkg >/dev/null 2>&1; then
-  echo 'ERROR: opkg missing. Requires an Enigma2 receiver with opkg.' >&2; exit 1
-fi
-if ! command -v sha256sum >/dev/null 2>&1; then
-  echo 'ERROR: sha256sum missing; cannot validate package.' >&2; exit 1
-fi
-if ! command -v wget >/dev/null 2>&1; then
-  echo 'ERROR: wget missing.' >&2; exit 1
-fi
-trap 'rm -f "$DEST.part"' EXIT HUP INT TERM
-echo 'Downloading SAT Channel Manager Pro RC4.1...'
-wget -q -T 30 -t 2 -O "$DEST.part" "$BASE/packages/$PACKAGE" || {
-  echo 'ERROR: download failed or package not yet published; no installation attempted.' >&2
-  exit 1
+PATCH="/tmp/satcm-$HOTFIX"
+for dep in opkg sha256sum wget python3; do
+    command -v "$dep" >/dev/null 2>&1 || { echo "ERROR: $dep missing" >&2; exit 1; }
+done
+trap 'rm -f "$DEST.part" "$PATCH.part"' EXIT HUP INT TERM
+check_hash() {
+    got="$(sha256sum "$1" | awk '{print $1}')"
+    [ "$got" = "$2" ] || { echo "ERROR: SHA256 mismatch for $1" >&2; exit 1; }
 }
-ACTUAL_SHA256="$(sha256sum "$DEST.part" | awk '{print $1}')"
-if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
-  echo 'ERROR: SHA256 mismatch; refusing installation.' >&2
-  exit 1
-fi
+echo 'Downloading SAT Channel Manager Pro RC4.1...'
+wget -q -T 30 -t 2 -O "$DEST.part" "$BASE/packages/$PACKAGE"
+check_hash "$DEST.part" "$EXPECTED_SHA256"
+echo 'Downloading OpenATV 8.0.1 modal crash hotfix...'
+wget -q -T 30 -t 2 -O "$PATCH.part" "$BASE/$HOTFIX"
+check_hash "$PATCH.part" "$HOTFIX_SHA256"
 mv -f "$DEST.part" "$DEST"
+mv -f "$PATCH.part" "$PATCH"
 echo 'SHA256 verified. Installing package...'
 opkg install "$DEST"
-echo 'Installed. Restart the Enigma2 GUI through OpenATV to load the plugin.'
-echo 'No channel scans or bouquet changes were performed by this installer.'
+echo 'Applying verified modal hotfix...'
+sh "$PATCH"
+echo 'Installed and hotfixed. Restart the Enigma2 GUI through OpenATV menu.'
+echo 'No scan or bouquet modification was performed.'
