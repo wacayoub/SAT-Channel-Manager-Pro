@@ -71,7 +71,7 @@ python3 "$PATCH" || {
 echo 'Downloading Neo icons + satellite selection clarity update...'
 NEO_PATCH='/tmp/satcm-neo-icons-easy-rc4.1.py'
 NEO_BLOB_SHA1='c40229a1308ba24810feae370526399b95a46445'
-wget -q -T 30 -t 2 -O "$NEO_PATCH.part" "$BASE/neo-icons-easy-rc4.1.py" || {
+wget -q -T 30 -t 2 -O "$NEO_PATCH.part" 'https://raw.githubusercontent.com/wacayoub/SAT-Channel-Manager-Pro/d65679b0e4e5f10eaaa7c32cd384e50ef4fdbb7f/neo-icons-easy-rc4.1.py' || {
     echo 'ERROR: Neo icon update download failed' >&2; exit 1
 }
 python3 - "$NEO_PATCH.part" "$NEO_BLOB_SHA1" <<'PY'
