@@ -30,7 +30,7 @@ n=once(n,"('Mettre a jour les frequences de 75W a 150E', 'smart_range')",
          "('3. FREQUENCES : plage 75W a 150E', 'smart_range')")
 n=once(n,"('Rechercher les chaines du satellite (scan tuner)', 'scan_current')",
          "('4. CHAINES TV : scan avec le tuner', 'scan_current')")
-n=once(n,"'Fusion des FREQUENCES (sans suppression) ou scan DVB. Apercu et backup obligatoires.'",
+n=once(n,"'Fusion de FREQUENCES, apercu, confirmation et backup.'",
          "'Frequences = satellites.xml ; chaines = scan DVB. Aucun import direct LyngSat.'")
 n=once(n,"('Actualiser les donnees satellites', 'update_all')",
          "('Telecharger les FREQUENCES OE-Alliance + OpenPLi', 'update_all')")
