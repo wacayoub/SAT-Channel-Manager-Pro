@@ -77,7 +77,7 @@ wget -q -T 30 -t 2 -O "$NEO_PATCH.part" "$BASE/neo-icons-easy-rc4.1.py" || {
 python3 - "$NEO_PATCH.part" "$NEO_BLOB_SHA1" <<'PY'
 import hashlib,sys
 data=open(sys.argv[1],'rb').read()
-digest=hashlib.sha1(('blob %d\\0'%len(data)).encode()+data).hexdigest()
+digest=hashlib.sha1(('blob %d\0'%len(data)).encode()+data).hexdigest()
 if digest!=sys.argv[2]:
     sys.exit('ERROR: Neo icon update checksum mismatch')
 print('Neo icon update verified.')
