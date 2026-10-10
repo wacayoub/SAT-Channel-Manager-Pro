@@ -48,3 +48,15 @@ Commande d'installation SSH :
     sh /tmp/install-sat.sh
 
 Limitation : RC4.1 Easy Mode fusionne les fréquences ; il n'importe pas directement les services TV depuis les sites LyngSat/KingOfSat/FlySat. Validation matérielle OpenATV 8.0.1 encore nécessaire.
+
+
+## Correctif Neo Icons (10 octobre 2026)
+L'installateur `install.sh` applique maintenant le correctif `neo-icons-easy-rc4.1.py` **apres** Easy Mode :
+- Trois icones natives Enigma2 en bas de l'ecran : Frequences/Scan, Mes bouquets, Options.
+- La touche `0` choisit toujours le preset Nilesat 7W / Badr 26E / Hot Bird 13E / Astra 19.2E, meme si un autre satellite est deja coche.
+- VERT met la selection de 4 satellites en premier ; les satellites coches restent un choix distinct.
+- Le menu et l'apercu distinguent les **transpondeurs** (`satellites.xml`) des **chaines TV**.
+
+**Important :** "0 nouveau TP" dans l'apercu n'est pas une erreur de telechargement : il peut s'agir de frequences deja presentes. Le telechargement des services TV directement depuis LyngSat / FlySat / KingOfSat n'est **pas encore implemente** ; pour ajouter effectivement des services TV aujourd'hui, choisir le scan DVB d'un satellite configure sur le tuner.
+
+Cette mise a jour d'interface ne change pas `lamedb`, les bouquets ou la configuration tuner. Elle conserve les copies des fichiers Python avant modification. A valider sur un vrai recepteur OpenATV 8.0.1.
