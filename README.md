@@ -31,3 +31,20 @@ Aucune fusion ne doit commencer sans aperçu, confirmation et sauvegarde. Ne pas
 
 ## Licence
 Voir les licences des sources de données utilisées ; le dépôt ne confère pas de droits supplémentaires sur LyngSat/FlySat/KingOfSat.
+
+
+## Easy Mode (interface simplifiée via SSH)
+- **VERT** : mises à jour des fréquences ou scan tuner (3 à 4 actions).
+- **JAUNE** : bouquets TV, radio et sauvegardes (3 actions).
+- **BLEU** : actualiser les données, sources, recherche, sauvegardes, options avancées (5 actions).
+- **OK** : cocher/décocher un satellite ; **0** : lancement direct de Smart Installation.
+
+Smart Installation télécharge automatiquement les catalogues manquants OE-Alliance et OpenPLi en arrière-plan. Un échec annule l'installation sans écriture. La sécurité historique est conservée : aperçu, confirmation, sauvegarde vérifiée, fusion non destructive.
+
+Le script install.sh vérifie le paquet IPK RC4.1 puis applique easy-mode-rc4.1.py après validation de son empreinte Git. La version opkg reste 0.4.1 ; le correctif modifie les fichiers Python et crée des backups .bak-before-easy-ui. Une version de code inconnue sera refusée.
+
+Commande d'installation SSH :
+    wget -O /tmp/install-sat.sh https://raw.githubusercontent.com/wacayoub/SAT-Channel-Manager-Pro/main/install.sh
+    sh /tmp/install-sat.sh
+
+Limitation : RC4.1 Easy Mode fusionne les fréquences ; il n'importe pas directement les services TV depuis les sites LyngSat/KingOfSat/FlySat. Validation matérielle OpenATV 8.0.1 encore nécessaire.
