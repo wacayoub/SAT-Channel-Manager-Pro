@@ -68,5 +68,23 @@ python3 "$PATCH" || {
     echo 'ERROR: Easy Mode patch refused this local code revision.' >&2
     exit 1
 }
+echo 'Downloading Neo icons + satellite selection clarity update...'
+NEO_PATCH='/tmp/satcm-neo-icons-easy-rc4.1.py'
+NEO_BLOB_SHA1='8979466d8197b6c27497d9eeb094e6f765847e64'
+wget -q -T 30 -t 2 -O "$NEO_PATCH.part" "$BASE/neo-icons-easy-rc4.1.py" || {
+    echo 'ERROR: Neo icon update download failed' >&2; exit 1
+}
+python3 - "$NEO_PATCH.part" "$NEO_BLOB_SHA1" <<'PY'
+import hashlib,sys
+data=open(sys.argv[1],'rb').read()
+digest=hashlib.sha1(('blob %d\\0'%len(data)).encode()+data).hexdigest()
+if digest!=sys.argv[2]:
+    sys.exit('ERROR: Neo icon update checksum mismatch')
+print('Neo icon update verified.')
+PY
+mv -f "$NEO_PATCH.part" "$NEO_PATCH"
+python3 "$NEO_PATCH" || {
+    echo 'ERROR: Neo icons update refused; previous installation left intact.' >&2; exit 1
+}
 echo 'Success. Restart the Enigma2 GUI from the OpenATV menu.'
 echo 'No scan, transponder merge or bouquet modification was performed.'
