@@ -1,0 +1,24 @@
+name: SAT Channel Manager RC5 Trial Validation (NO RELEASE)
+on:
+  push:
+    branches:
+      - feature/rc5-trial-validation
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate RC4.1 baseline, safety and Easy/Neo UI
+        run: python3 -m unittest discover -s tests -p 'test_rc5_*.py' -v
+      - name: Verify untouched stable install path
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code origin/main -- install.sh packages CHANGELOG.md
+          echo "PASS: main installer, shipped RC4.1 IPK and release notes remain unchanged"
