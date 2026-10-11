@@ -77,6 +77,8 @@ jobs:
         run: |
           python3 -m py_compile scripts/audit-rc5-sources.py
           python3 scripts/audit-rc5-sources.py
+      - name: Audit OE/PLI and genuine nonzero TV catalogue independently
+        run: python3 scripts/audit-rc5-sources.py --online
       - name: Verify untouched stable install path
         shell: bash
         run: |
