@@ -62,7 +62,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sh scripts/receiver-rc5-trial.sh --build-only
+          SATCM_SOURCE_BASE="https://raw.githubusercontent.com/wacayoub/SAT-Channel-Manager-Pro/${GITHUB_SHA}" sh scripts/receiver-rc5-trial.sh --build-only
           test -s /tmp/satcm-rc5-trial.ipk
           python3 - <<'PY'
           from pathlib import Path
