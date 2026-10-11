@@ -26,6 +26,8 @@ jobs:
             ar p rc5-trial.ipk data.tar.gz | tar -tzf - | grep -F "/SATChannelManager/$name"
           done
           ar p rc5-trial.ipk data.tar.gz | tar -tzf - | grep -F "/SATChannelManager/RC5-TRIAL-HOLD.txt"
+      - name: Confirm real RC5 plugin scan pipeline and non-destructive bouquets
+        run: python3 scripts/check_rc5_scan_pipeline.py
       - name: Verify installed Vu+ icon locations inside the RC5 package
         shell: bash
         run: |
