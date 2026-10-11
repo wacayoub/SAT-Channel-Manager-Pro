@@ -26,12 +26,12 @@ EXT = Path("usr/lib/enigma2/python/Plugins/Extensions/SATChannelManager")
 
 def ar_member(path, wanted):
     archive = path.read_bytes()
-    if not archive.startswith(b"!<arch>\\n"):
+    if not archive.startswith(b"!<arch>\n"):
         raise AssertionError("Not an ar archive")
     pos = 8
     while pos + 60 <= len(archive):
         header = archive[pos:pos + 60]
-        if header[58:60] != b"`\\n":
+        if header[58:60] != b"`\n":
             raise AssertionError("Invalid ar header")
         name = header[:16].decode("ascii").strip().rstrip("/")
         size = int(header[48:58].strip())
@@ -48,18 +48,18 @@ def ar_member(path, wanted):
 def write_ar(path, members):
     # BusyBox ar on Vu+ often cannot create archives (only list/extract).
     with open(path, "wb") as handle:
-        handle.write(b"!<arch>\\n")
+        handle.write(b"!<arch>\n")
         for name, content in members:
             name_field = (name + "/").ljust(16)
             header = (name_field + "0".ljust(12) + "0".ljust(6) +
                       "0".ljust(6) + "100644".ljust(8) +
-                      str(len(content)).ljust(10) + "`\\n").encode("ascii")
+                      str(len(content)).ljust(10) + "`\n").encode("ascii")
             if len(header) != 60:
                 raise AssertionError("Invalid ar member header")
             handle.write(header)
             handle.write(content)
             if len(content) % 2:
-                handle.write(b"\\n")
+                handle.write(b"\n")
 
 
 def unpack(ipk, group, dest):
