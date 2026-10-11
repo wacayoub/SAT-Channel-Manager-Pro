@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "packages/enigma2-plugin-extensions-satchannelmanager_0.4.1-rc4.1_all.ipk"
 OUT = ROOT / "rc5-trial.ipk"
 HASH = "4eed0b5c1c61cf2e763b431a57ef5b2977d845164a345bef439991242595762a"
-VERSION = "0.5.0-rc5-trial"
+VERSION = "0.5.1-rc5.1-trial"
 EXT = Path("usr/lib/enigma2/python/Plugins/Extensions/SATChannelManager")
 
 
@@ -135,6 +135,22 @@ def main():
         if original.count(old) != 1:
             raise AssertionError("Unrecognized Easy Mode version marker")
         core.write_text(original.replace(old, "VERSION = '" + VERSION + "'"))
+        # Real TV services (Morpheus883) are a SEPARATE, opt-in online index.
+        # Bundled source does not download on start and never imports lamedb.
+        for name in ("service_sources_rc5.py", "service_sources_rc5_ui.py"):
+            code = (ROOT / "scripts" / name).read_bytes()
+            compile(code, name, "exec")
+            (ext / name).write_bytes(code)
+        neo_path = ext / "neo.py"
+        neo_glue = (
+            "\n# RC5.1: explicit online TV catalogue PREVIEW, no automatic imports.\n"
+            "try:\n"
+            "    from .service_sources_rc5_ui import attach_home as _rc5_tv_attach\n"
+            "    _rc5_tv_attach(SATNeoHome)\n"
+            "except Exception:\n"
+            "    pass  # remain compatible if optional external source fails\n"
+        )
+        neo_path.write_bytes(neo_path.read_bytes() + neo_glue.encode("utf-8"))
         for py in ext.rglob("*.py"):
             compile(py.read_bytes(), str(py), "exec")
         for icon in ("install", "bouquets", "options"):
@@ -153,7 +169,7 @@ def main():
         txt = txt.replace(oldver, "Version: " + VERSION)
         conf.write_text(txt)
         (ext / "RC5-TRIAL-HOLD.txt").write_text(
-            "RC5 trial: bundled audited Easy Mode + Neo Icons from RC4.1.\n"
+            "RC5.1 trial: audited Easy Mode + Neo Icons; optional real online TV index.\n"
             "No direct TV service import from LyngSat, FlySat or KingOfSat.\n"
             "SAT/tuner scans remain receiver-dependent; test hardware before release.\n"
             "This build is not published to online update.\n"
