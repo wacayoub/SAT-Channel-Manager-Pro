@@ -102,11 +102,7 @@ tar -tzf "$ARCHIVE" >/dev/null
 cp "$SRC" "$BACKUP_DIR/rc4.1-restore.ipk"
 printf '%s\n' "$ARCHIVE" > "$BACKUP_DIR/rc5-last-backup-path"
 echo "BACKUP VERIFIED: $ARCHIVE"
-echo "Installing RC5 Trial package (no scan/merge)..."
-opkg install "$OUT"
-echo "RC5 TRIAL INSTALLED. Restart Enigma2 GUI from OpenATV menu."
-
-# Write a separate, offline-capable recovery command.
+# Write a separate, offline-capable recovery command BEFORE installation.
 cat > "$BACKUP_DIR/rollback-rc5.sh" <<'RECOVER'
 #!/bin/sh
 set -eu
@@ -123,5 +119,12 @@ tar -xzf "$A" -C /
 echo "Rollback completed. Restart Enigma2 GUI from OpenATV menu."
 RECOVER
 chmod 700 "$BACKUP_DIR/rollback-rc5.sh"
+echo "RECOVERY READY: sh $BACKUP_DIR/rollback-rc5.sh"
+echo "Installing RC5 Trial package (no scan/merge)..."
+if ! opkg install "$OUT"; then
+  echo "ERROR: opkg install failed. Original backup and recovery command remain available." >&2
+  exit 1
+fi
+echo "RC5 TRIAL INSTALLED. Restart Enigma2 GUI from OpenATV menu."
 echo "To restore: sh $BACKUP_DIR/rollback-rc5.sh"
 echo "No scan, transponder merge, tuner change, or bouquet change was performed."
