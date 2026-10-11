@@ -26,6 +26,30 @@ jobs:
             ar p rc5-trial.ipk data.tar.gz | tar -tzf - | grep -F "/SATChannelManager/$name"
           done
           ar p rc5-trial.ipk data.tar.gz | tar -tzf - | grep -F "/SATChannelManager/RC5-TRIAL-HOLD.txt"
+      - name: Verify installed Vu+ icon locations inside the RC5 package
+        shell: bash
+        run: |
+          set -euo pipefail
+          ar p rc5-trial.ipk data.tar.gz | tar -xzOf - ./usr/lib/enigma2/python/Plugins/Extensions/SATChannelManager/ui_skin.py > /tmp/satcm-rc5-ui.py
+          grep -F '/usr/lib/enigma2/python/Plugins/Extensions/SATChannelManager/icons/install.png' /tmp/satcm-rc5-ui.py
+          grep -F '/usr/lib/enigma2/python/Plugins/Extensions/SATChannelManager/icons/bouquets.png' /tmp/satcm-rc5-ui.py
+          grep -F '/usr/lib/enigma2/python/Plugins/Extensions/SATChannelManager/icons/options.png' /tmp/satcm-rc5-ui.py
+          ! grep -F '/tmp/satcm-rc5-build-' /tmp/satcm-rc5-ui.py
+      - name: Run public Vu+ build/bootstrap script without installing
+        shell: bash
+        run: |
+          set -euo pipefail
+          sh scripts/receiver-rc5-trial.sh --build-only
+          test -s /tmp/satcm-rc5-trial.ipk
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          a = Path('rc5-trial.ipk').read_bytes()
+          b = Path('/tmp/satcm-rc5-trial.ipk').read_bytes()
+          assert a == b, 'Receiver bootstrap generated a different IPK'
+          print('PASS remote receiver bootstrap byte-for-byte equals local RC5 trial')
+          print('SHA256:', hashlib.sha256(a).hexdigest())
+          PY
       - name: Verify untouched stable install path
         shell: bash
         run: |
