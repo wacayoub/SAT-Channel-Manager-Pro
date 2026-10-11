@@ -10,7 +10,8 @@ case "$MODE" in
   *) echo "Usage: sh receiver-rc5-trial.sh [--build-only|--install]" >&2; exit 2 ;;
 esac
 
-BASE="https://raw.githubusercontent.com/wacayoub/SAT-Channel-Manager-Pro/feature/rc5-trial-validation"
+# CI may pin a commit SHA to avoid stale raw.githubusercontent.com branch cache.
+BASE="${SATCM_SOURCE_BASE:-https://raw.githubusercontent.com/wacayoub/SAT-Channel-Manager-Pro/feature/rc5-trial-validation}"
 WORK="/tmp/satcm-rc5-source"
 OUT="/tmp/satcm-rc5-trial.ipk"
 SRC="$WORK/packages/enigma2-plugin-extensions-satchannelmanager_0.4.1-rc4.1_all.ipk"
@@ -50,6 +51,11 @@ ACTUAL="$(sha256sum "$SRC" | sed 's/[[:space:]].*$//')"
   exit 1
 }
 
+# Reject stale or mixed Github CDN source before creating an IPK.
+grep -Fq 'VERSION = "0.5.1-rc5.1-trial"' "$WORK/scripts/build-rc5-trial.py" || {
+  echo "ERROR: stale RC5.0 builder from GitHub cache; no installation." >&2
+  exit 1
+}
 (cd "$WORK" && python3 scripts/build-rc5-trial.py)
 [ -s "$WORK/rc5-trial.ipk" ] || { echo 'ERROR: no trial IPK' >&2; exit 1; }
 cp "$WORK/rc5-trial.ipk" "$OUT"
@@ -70,7 +76,8 @@ PKG_STATUS="$(opkg status "$PKG" 2>/dev/null || true)"
 CURRENT="$(printf '%s\n' "$PKG_STATUS" | sed -n 's/^Version: //p' | sed -n '1p')"
 case "$CURRENT" in
   0.4.1-rc4.1) ;;
-  0.5.0-rc5-trial)
+  0.5.0-rc5-trial) ;;
+  0.5.1-rc5.1-trial)
     echo "RC5 Trial already installed; nothing else changed."
     echo "Backup remains under $BACKUP_DIR."
     exit 0 ;;
