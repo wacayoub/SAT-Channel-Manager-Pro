@@ -17,6 +17,24 @@ jobs:
           persist-credentials: false
       - name: Validate RC4.1 baseline, safety and Easy/Neo UI
         run: python3 -m unittest discover -s tests -p 'test_rc5_*.py' -v
+      - name: Test genuine remote Enigma2 service source (read-only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          from service_sources_rc5 import download_service_catalog, source_status
+          online = download_service_catalog()
+          report = source_status((-70, 130, 192, 255, 260), online=online, local={})
+          for row in report['rows']:
+              print(row['label'], row['online_tv'], 'TV services, nonzero if covered')
+          assert report['all_services'] > 10000
+          assert report['all_tv'] > 8000
+          for row in report['rows']:
+              assert row['online_tv'] > 10, row
+          print('PASS: real public third-party TV service source works; no receiver writes')
+          PY
       - name: Build isolated RC5 Trial IPK (NO INSTALL)
         run: |
           python3 scripts/build-rc5-trial.py
