@@ -13,7 +13,7 @@ from service_sources_rc5 import (parse_lamedb, normalize_position, source_status
 
 TEST_LAMEDB = b"""eDVB services /4/
 transponders
-dc800000:0001:0001
+0dca0000:0001:0001
 s 11000000:27500000:0:2:3530:2:0
 /
 00820000:0002:0002
@@ -21,10 +21,10 @@ s 12000000:27500000:0:2:130:2:0
 /
 end
 services
-0011:dc800000:0001:0001:1:0
+0011:0dca0000:0001:0001:1:0
 Nilesat TV
 p:Provider
-0012:dc800000:0001:0001:2:0
+0012:0dca0000:0001:0001:2:0
 Radio Nilesat
 p:Provider
 0021:00820000:0002:0002:25:0
@@ -58,7 +58,7 @@ class TVSourceTests(unittest.TestCase):
 
     def test_positions_and_west_wrapping(self):
         self.assertEqual(normalize_position("00820000"), 130)
-        self.assertEqual(normalize_position("dc800000"), -70)
+        self.assertEqual(normalize_position("0dca0000"), -70)
         self.assertEqual(normalize_position("01680000"), 360)
         self.assertIsNone(normalize_position("f0000000"))
 
