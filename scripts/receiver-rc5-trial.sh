@@ -30,6 +30,8 @@ for item in \
   "scripts/build-rc5-trial.py" \
   "easy-mode-rc4.1.py" \
   "neo-icons-easy-rc4.1.py" \
+  "scripts/service_sources_rc5.py" \
+  "scripts/service_sources_rc5_ui.py" \
   "packages/enigma2-plugin-extensions-satchannelmanager_0.4.1-rc4.1_all.ipk"
 do
   echo "Download $item ..."
