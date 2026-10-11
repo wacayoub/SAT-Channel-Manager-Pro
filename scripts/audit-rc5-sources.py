@@ -79,6 +79,59 @@ def lamedb_info():
         return "unreadable: " + str(exc)
 
 
+def genuine_tv_catalogue_online():
+    """Independent Enigma2 motor lamedb: genuine TV service refs, no changes."""
+    url = ("https://raw.githubusercontent.com/morpheus883/enigma2-settings/"
+           "master/morph883_motor/lamedb")
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "SATChannelManager-RC5-Audit/TV-ReadOnly"
+    })
+    with urllib.request.urlopen(req, timeout=15) as response:
+        if not response.geturl().startswith(
+                "https://raw.githubusercontent.com/morpheus883/enigma2-settings/"):
+            raise ValueError("Unexpected TV catalogue redirect")
+        data = response.read(3 * 1024 * 1024 + 1)
+    if len(data) > 3 * 1024 * 1024:
+        raise ValueError("TV catalogue exceeds size cap")
+    lines = data.decode("utf-8", "replace").splitlines()
+    if not lines or not lines[0].startswith("eDVB services /4/"):
+        raise ValueError("Unexpected catalogue service database version")
+    if "services" not in lines:
+        raise ValueError("No Enigma2 service section")
+    positions = {-70: 0, 130: 0, 192: 0, 255: 0, 260: 0}
+    valid_tv = set()
+    section = False
+    for index, line in enumerate(lines):
+        if line == "services":
+            section = True
+            continue
+        if not section:
+            continue
+        if line == "end":
+            break
+        m = re.fullmatch(
+            r"([0-9a-fA-F]{1,8}):([0-9a-fA-F]{8}):"
+            r"([0-9a-fA-F]{1,4}):([0-9a-fA-F]{1,4}):(\d+):(\d+)",
+            line.strip())
+        if not m or index + 1 >= len(lines):
+            continue
+        sid, namespace, tsid, onid = (int(m.group(n), 16) for n in range(1, 5))
+        stype = int(m.group(5))
+        name = lines[index + 1].strip()
+        if sid == 0 or stype not in (1, 4, 17, 19, 22, 25, 31, 134, 135) or not name or name == ".":
+            continue
+        pos = namespace >> 16
+        if pos > 1800:
+            pos -= 3600
+        valid_tv.add((sid, namespace, tsid, onid, pos))
+    if len(valid_tv) < 1000:
+        raise ValueError("TV service index incomplete")
+    for row in valid_tv:
+        if row[4] in positions:
+            positions[row[4]] += 1
+    return len(valid_tv), positions
+
+
 def main():
     parser = argparse.ArgumentParser(description="Read-only SAT RC5 source diagnostic")
     parser.add_argument("--online", action="store_true",
@@ -104,8 +157,20 @@ def main():
                 print("%s ONLINE: FAILED (%s: %s)" % (
                     label, type(exc).__name__, str(exc)[:160]))
     print("Receiver lamedb:", lamedb_info())
-    print("CONCLUSION: HTTPS XML sources supply satellite TRANSPONDERS, not a")
-    print("channel/service catalogue. Native DVB-S2 scan populates lamedb.")
+    if args.online:
+        print("---- Genuine online TV services (SEPARATE FROM OE/PLI XML) ----")
+        try:
+            total, rows = genuine_tv_catalogue_online()
+            print("Morpheus883 ONLINE TV source: OK; %d actual TV service records" % total)
+            for pos in (-70, 130, 192, 255, 260):
+                label = "%.1f%s" % (abs(pos) / 10.0, "W" if pos < 0 else "E")
+                print("  %s : %d TV catalogue entries" % (label, rows[pos]))
+        except Exception as exc:
+            print("Morpheus883 ONLINE TV: FAILED (%s: %s)" % (
+                type(exc).__name__, str(exc)[:160]))
+    print("CONCLUSION: OE-Alliance/OpenPLi XML contain frequencies, NOT TV")
+    print("services. The optional Morpheus883 source holds real service records.")
+    print("Service availability still requires DVB-S2 tuner reception/scan.")
     print("No file was written; no scan, bouquet or tuner settings changed.")
 
 
