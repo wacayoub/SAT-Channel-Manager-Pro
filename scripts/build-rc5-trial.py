@@ -112,6 +112,18 @@ def main():
                                check=True, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, timeout=30)
             print(script, p.stdout.decode("utf-8", "replace").strip())
+        # Neo Icon patch writes absolute pixmap references based on its
+        # staging folder. They MUST be rewritten to the installed Enigma2
+        # extension path or all three icons disappear on the Vu+.
+        skin = ext / "ui_skin.py"
+        ui = skin.read_text("utf-8")
+        temporary_icons = str(ext / "icons")
+        installed_icons = "/" + EXT.as_posix() + "/icons"
+        if ui.count(temporary_icons) != 3:
+            raise AssertionError("Expected exactly three staged Neo icon paths")
+        skin.write_text(ui.replace(temporary_icons, installed_icons), encoding="utf-8")
+        if temporary_icons in skin.read_text("utf-8"):
+            raise AssertionError("Trial package still refers to temporary Neo assets")
         # The patches intentionally produce backups for on-receiver use, but
         # they must not ship stale/duplicate Python modules inside an IPK.
         for p in ext.rglob("*"):
