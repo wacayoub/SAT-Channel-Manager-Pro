@@ -57,21 +57,21 @@ def main():
     assert "atomic_save" in methods_called(download), (
         "Source download should only save validated XML cache"
     )
-    scan = cls_method(neo, "SATNeoScreen", "launch_multi_scan")
+    scan = cls_method(neo, "SATNeoHome", "launch_multi_scan")
     assert_native_scan(scan)
     self_scan = cls_method(plugin, "SATChannelManager", "_launch_scan_after_timeshift")
     assert_native_scan(self_scan)
 
-    gui_scan = cls_method(neo, "SATNeoScreen", "scan_current")
+    gui_scan = cls_method(neo, "SATNeoHome", "scan_current")
     assert "open_advanced" in methods_called(gui_scan), (
         "GREEN CHAINES must open native scan options"
     )
-    gui_multi = cls_method(neo, "SATNeoScreen", "scan_selected")
+    gui_multi = cls_method(neo, "SATNeoHome", "scan_selected")
     assert "openWithCallback" in methods_called(gui_multi), (
         "Multi-satellite scan needs user confirmation"
     )
 
-    for tree, cls, name in ((neo, "SATNeoScreen", "scan_finished"),
+    for tree, cls, name in ((neo, "SATNeoHome", "scan_finished"),
                             (plugin, "SATChannelManager", "scan_done")):
         method = cls_method(tree, cls, name)
         assert "revert_last_scanned" in methods_called(method), (
