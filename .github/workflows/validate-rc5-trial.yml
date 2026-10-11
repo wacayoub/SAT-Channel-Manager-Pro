@@ -50,6 +50,10 @@ jobs:
           print('PASS remote receiver bootstrap byte-for-byte equals local RC5 trial')
           print('SHA256:', hashlib.sha256(a).hexdigest())
           PY
+      - name: Verify source-diagnostic runs without network or receiver access
+        run: |
+          python3 -m py_compile scripts/audit-rc5-sources.py
+          python3 scripts/audit-rc5-sources.py
       - name: Verify untouched stable install path
         shell: bash
         run: |
