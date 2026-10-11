@@ -39,11 +39,14 @@ jobs:
         run: |
           python3 scripts/build-rc5-trial.py
           test -s rc5-trial.ipk
-          ar p rc5-trial.ipk control.tar.gz | tar -xzOf - ./control | grep -Fx 'Version: 0.5.0-rc5-trial'
+          ar p rc5-trial.ipk control.tar.gz | tar -xzOf - ./control | grep -Fx 'Version: 0.5.1-rc5.1-trial'
           for name in neo.py plugin.py core.py ui_skin.py; do
             ar p rc5-trial.ipk data.tar.gz | tar -tzf - | grep -F "/SATChannelManager/$name"
           done
           ar p rc5-trial.ipk data.tar.gz | tar -tzf - | grep -F "/SATChannelManager/RC5-TRIAL-HOLD.txt"
+          ar p rc5-trial.ipk data.tar.gz | tar -tzf - | grep -F "/SATChannelManager/service_sources_rc5.py"
+          ar p rc5-trial.ipk data.tar.gz | tar -tzf - | grep -F "/SATChannelManager/service_sources_rc5_ui.py"
+          ar p rc5-trial.ipk data.tar.gz | tar -xzOf - ./usr/lib/enigma2/python/Plugins/Extensions/SATChannelManager/neo.py | grep -F '_rc5_tv_attach(SATNeoHome)'
       - name: Confirm real RC5 plugin scan pipeline and non-destructive bouquets
         run: python3 scripts/check_rc5_scan_pipeline.py
       - name: Verify installed Vu+ icon locations inside the RC5 package
