@@ -13,6 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           persist-credentials: false
       - name: Validate RC4.1 baseline, safety and Easy/Neo UI
         run: python3 -m unittest discover -s tests -p 'test_rc5_*.py' -v
