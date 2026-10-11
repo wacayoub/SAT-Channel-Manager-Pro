@@ -17,9 +17,25 @@ jobs:
           persist-credentials: false
       - name: Validate RC4.1 baseline, safety and Easy/Neo UI
         run: python3 -m unittest discover -s tests -p 'test_rc5_*.py' -v
+      - name: Build isolated RC5 Trial IPK (NO INSTALL)
+        run: |
+          python3 scripts/build-rc5-trial.py
+          test -s rc5-trial.ipk
+          ar p rc5-trial.ipk control.tar.gz | tar -xzOf - ./control | grep -Fx 'Version: 0.5.0-rc5-trial'
+          for name in neo.py plugin.py core.py ui_skin.py; do
+            ar p rc5-trial.ipk data.tar.gz | tar -tzf - | grep -F "/SATChannelManager/$name"
+          done
+          ar p rc5-trial.ipk data.tar.gz | tar -tzf - | grep -F "/SATChannelManager/RC5-TRIAL-HOLD.txt"
       - name: Verify untouched stable install path
         shell: bash
         run: |
           set -euo pipefail
           git diff --exit-code origin/main -- install.sh packages CHANGELOG.md
           echo "PASS: main installer, shipped RC4.1 IPK and release notes remain unchanged"
+      - name: Keep RC5 Trial artifact for offline inspection (NOT A RELEASE)
+        uses: actions/upload-artifact@v4
+        with:
+          name: SAT-Channel-Manager-Pro-RC5-TRIAL-NO-INSTALL
+          path: rc5-trial.ipk
+          retention-days: 3
+          if-no-files-found: error
