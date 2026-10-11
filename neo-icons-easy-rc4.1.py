@@ -18,7 +18,7 @@ if "0.4.1-rc4.1-easy" not in (root/"core.py").read_text(encoding="utf-8"):
     raise SystemExit("ERROR: this patch expects RC4.1 Easy Mode. No files changed.")
 if "icons/install.png" in s and "self.smart_installation('preset')" in n:
     assets = [root/"icons"/(item+".png") for item in ("install","bouquets","options")]
-    if not all(p.is_file() and p.read_bytes().startswith(b"\\x89PNG\\r\\n\\x1a\\n") for p in assets):
+    if not all(p.is_file() and p.read_bytes().startswith(b"\x89PNG\r\n\x1a\n") for p in assets):
         raise SystemExit("ERROR: Neo source patched but an icon is missing/corrupt. Refusing silent success.")
     print("Neo icon patch already installed and verified.")
     raise SystemExit(0)
