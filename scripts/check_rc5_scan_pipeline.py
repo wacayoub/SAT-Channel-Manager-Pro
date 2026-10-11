@@ -28,8 +28,14 @@ def cls_method(tree, cls, name):
 
 
 def methods_called(node):
-    return {x.func.attr for x in ast.walk(node) if isinstance(x, ast.Call)
-            and isinstance(x.func, ast.Attribute)}
+    called = set()
+    for x in ast.walk(node):
+        if isinstance(x, ast.Call):
+            if isinstance(x.func, ast.Attribute):
+                called.add(x.func.attr)
+            elif isinstance(x.func, ast.Name):
+                called.add(x.func.id)
+    return called
 
 
 def assert_native_scan(callsite):
