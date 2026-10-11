@@ -12,11 +12,16 @@ if not neo.is_file() or not skin.is_file() or neo.is_symlink() or skin.is_symlin
     raise SystemExit("ERROR: SAT Channel Manager installation not found or unsafe path.")
 n=neo.read_text(encoding="utf-8")
 s=skin.read_text(encoding="utf-8")
-if "icons/install.png" in s and "self.smart_installation('preset')" in n:
-    print("Neo icon patch already installed. Restart GUI if icons are not visible.")
-    raise SystemExit(0)
+# Even an already-patched GUI must be checked against its supported core
+# version. Otherwise an unknown upgrade is silently reported as a success.
 if "0.4.1-rc4.1-easy" not in (root/"core.py").read_text(encoding="utf-8"):
     raise SystemExit("ERROR: this patch expects RC4.1 Easy Mode. No files changed.")
+if "icons/install.png" in s and "self.smart_installation('preset')" in n:
+    assets = [root/"icons"/(item+".png") for item in ("install","bouquets","options")]
+    if not all(p.is_file() and p.read_bytes().startswith(b"\\x89PNG\\r\\n\\x1a\\n") for p in assets):
+        raise SystemExit("ERROR: Neo source patched but an icon is missing/corrupt. Refusing silent success.")
+    print("Neo icon patch already installed and verified.")
+    raise SystemExit(0)
 def once(text,old,new):
     if text.count(old)!=1: raise ValueError("Unexpected Enigma2 source layout: "+old[:70])
     return text.replace(old,new)
